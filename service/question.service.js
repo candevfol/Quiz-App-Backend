@@ -20,28 +20,49 @@ const create_question = async (quizId, body) => {
             }
         })
     }) )
+
     const options_add = await Promise.all(body.flatMap((quest,ind) => {
-        return quest.option.map(opt => {
-            return prisma.option.create({
+        if(quest.type === "SUB"){
+            return [prisma.option.create({
                 data: {
-                    content: opt,
+                    content: quest.correctoption,
                     questionId: question_add[ind].id
                 }
+            })]
+        }
+        else{ 
+            return quest.option.map(opt => {
+                return prisma.option.create({
+                    data: {
+                        content: opt,
+                        questionId: question_add[ind].id
+                    }
+                })
             })
-        })
+        }
     }))
     let start_index = 0;
     const correct_options_add = await Promise.all(body.flatMap((quest,ind1)=> {
         let current_index = start_index;
-        start_index += quest.option.length;
-        return quest.correctoption.map((opt,ind2)=> {
-            return prisma.correctOption.create({
+        quest.type!=="SUB"? start_index += quest.option.length : start_index++;
+        if(quest.type === "SUB"){
+            return [prisma.correctOption.create({
                 data: {
                     questionId: question_add[ind1].id,
-                    ansId: options_add[opt + current_index].id
+                    ansId: options_add[current_index].id
                 }
+            })]
+        }
+        else{
+            return quest.correctoption.map((opt,ind2)=> {
+                return prisma.correctOption.create({
+                    data: {
+                        questionId: question_add[ind1].id,
+                        ansId: options_add[opt + current_index].id
+                    }
+                })
             })
-        })
+        }
     }))
     
     return {success: true, data: "Question created successfully"}
