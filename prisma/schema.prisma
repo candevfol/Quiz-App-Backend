@@ -21,7 +21,7 @@ model Quiz {
 
 model Questions {
   id      Int          @id @default(autoincrement())
-  content String
+  question String
   score   Int          @default(0)
   type    QuestionType
 
