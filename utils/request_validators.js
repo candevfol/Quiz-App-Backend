@@ -5,10 +5,6 @@ const create_quiz_schema = z.object({
     .string({ required_error: "title(string) must be provided" })
     .nonempty("title cannot be empty"),
 });
-
-const QuestionType = z.enum(["MCQ", "MSQ", "SUB"]);
-
-// const question_schema = z.object({
 //     question: z.string().nonempty("Question cannot be empty"),
 //     option: z.array(z.string()).min(1, "Option must have at least 1 element").optional(),
 //     correctoption: 
@@ -59,7 +55,13 @@ const mcqSchema = z.object({
     score: z.number("Please give score of question"),
   });
   
-  const question_schema = z.discriminatedUnion("type", [mcqSchema, msqSchema, subSchema]);
-  const create_question_schema = z.array(question_schema)
+const question_schema = z.discriminatedUnion("type", [mcqSchema, msqSchema, subSchema]);
+const create_question_schema = z.array(question_schema)
 
-export { create_quiz_schema, create_question_schema };
+const sub_answer_schema = z.object({
+    questionId: z.number(),
+    answer: z.union([z.array(z.number())], z.string())
+})
+const answer_schema = z.array(sub_answer_schema)
+
+export { create_quiz_schema, create_question_schema, answer_schema };

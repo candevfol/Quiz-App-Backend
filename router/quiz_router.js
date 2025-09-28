@@ -1,6 +1,6 @@
 import express from 'express';
-import { create_quiz_schema } from "../utils/request_validators.js";
-import { create_quiz, getall_quiz } from '../service/quiz.service.js';
+import { answer_schema, create_quiz_schema } from "../utils/request_validators.js";
+import { create_quiz, getall_quiz, getScore } from '../service/quiz.service.js';
 
 const quizRouter = express.Router();
 
@@ -38,6 +38,24 @@ quizRouter.get('/', async (req, res, next) => {
     catch(err){
         next(err);
     }
+})
+quizRouter.get('/answer/:id', async(req,res,next)=>{
+    const validatedData = answer_schema.safeParse(req.body);
+    if(!validatedData.success){
+        const errorMessages = validatedData.error.issues.map(err => ({
+            field: err.path.join('.'),
+            message: err.message
+        }));
+        return res.status(400).json({
+            success: false, 
+            message: "Validation failed",
+            errors: errorMessages
+        });
+    } 
+    const id = parseInt(req.params.id, 10);
+    const score_response = await getScore(id, req.body);
+    if(!score_response.success) return res.status(401).json({success: false, message: score_response.message });
+    return res.status(200).json({success: true, message: score_response.message, data: `Total Score: ${score_response.data}`});
 })
 
 export default quizRouter;
