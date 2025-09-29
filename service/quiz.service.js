@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { askGemini } from "../utils/utility.js";
 
 const prisma = new PrismaClient();
 
@@ -33,7 +34,15 @@ const getScore = async (quizId, body) => {
       continue;
     }
     if (question.type === "SUB") {
-
+        const submitted_answer = ans.answer;
+        const correct_answerObject = await prisma.option.findMany({
+            where :{
+                questionId: question.id
+            }
+        });
+        const correct_answer = correct_answerObject[0].content;
+        const isMatching = await askGemini(submitted_answer, correct_answer, question.question)
+        isMatching === "true" ? scoreArray.push(question.score) : scoreArray.push(0);
     } else {
       const correct_option_ids_object = await prisma.correctOption.findMany({
         where: { questionId: question.id },
@@ -47,12 +56,16 @@ const getScore = async (quizId, body) => {
 
       const submitted_option_ids = ans.answer;
 
-      if (question.type === "MCQ" && submitted_option_ids.length === 1 && correct_option_ids[0] === submitted_option_ids[0]) {
-        scoreArray.push(question.score);
+      if (question.type === "MCQ") {
+        if(submitted_option_ids.length === 1 && correct_option_ids[0] === submitted_option_ids[0])
+                scoreArray.push(question.score);
+        else
+                scoreArray.push(0);
       }
       if (question.type === "MSQ") {
         const isAllCorrect = submitted_option_ids.length === correct_option_ids.length && submitted_option_ids.every((id) => correct_option_ids.includes(id));
         if (isAllCorrect) scoreArray.push(question.score);
+        else scoreArray.push(0);
       }
     }
   }

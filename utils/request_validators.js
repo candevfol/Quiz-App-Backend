@@ -60,8 +60,10 @@ const create_question_schema = z.array(question_schema)
 
 const sub_answer_schema = z.object({
     questionId: z.number(),
-    answer: z.union([z.array(z.number())], z.string())
+    answer: z.union([z.array(z.number()), z.string()])
 })
 const answer_schema = z.array(sub_answer_schema)
+
+
 
 export { create_quiz_schema, create_question_schema, answer_schema };
