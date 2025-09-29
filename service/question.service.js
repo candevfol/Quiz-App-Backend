@@ -10,6 +10,7 @@ const create_question = async (quizId, body) => {
     if(!quiz){
         return { success:false, data: "quiz not found"};
     } 
+    let data = []
     const question_add = await Promise.all(body.map(quest => {
         return prisma.questions.create({
             data: {
@@ -74,13 +75,23 @@ const getAllQuestions = async(quizId) => {
     if(!quiz){
         return { success:false, data: "quiz not found"};
     }
-    const questions = await prisma.questions.findMany({
-        where:{
-            quizId:quizId
+
+    const questionsWithOptions = await prisma.questions.findMany({
+        where: { quizId: quizId },
+        include: {
+          Option: {
+            select: {
+              id: true,
+              content: true
+            }
+          }
         }
-    });
-    return { success:true, data: questions};
+      });
+      
+    return { success:true, data: questionsWithOptions, message: "Questions fetched successfully"};
 }
+
+                                  
 
 
 

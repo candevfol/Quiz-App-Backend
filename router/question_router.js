@@ -37,7 +37,7 @@ questionRouter.get('/:id', async (req, res, next) => {
         const question_response = await getAllQuestions(quizId);
         if(!question_response.success) return res.status(401).json({success: false, message: question_response.data });
         
-        return res.status(200).json({success: true, questions: question_response.data});
+        return res.status(200).json({success: true, message:question_response.message, questions: question_response.data});
     }
     catch(err){
         next(err)
