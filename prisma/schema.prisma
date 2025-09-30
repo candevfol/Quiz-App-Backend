@@ -7,6 +7,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+    id             String       @id @default(uuid())
+    createdAt      DateTime     @default(now())
+    username       String       @unique @db.VarChar(20)
+    password       String       
+    score           Int         @default(0)
+
+    Authentication Authentication[]
+}
+
+model Authentication{
+  userId String 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade )
+
+  jwt String
+  isValid Boolean
+
+  @@id([userId, jwt])
+}
+
 model Quiz {
   id        Int         @id @default(autoincrement())
   title     String

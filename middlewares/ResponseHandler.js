@@ -1,4 +1,4 @@
-import Response from "./Response.js";
+import Response from "../utils/Response.js";
 
 const responseMiddleware = (req, res, next) => {
   res.ok = (message = "Success", data = null) => {
@@ -19,6 +19,10 @@ const responseMiddleware = (req, res, next) => {
 
   res.server_error = (message = "Something went wrong", data = null) => {
     return res.status(500).json(new Response(message, data));
+  };
+
+  res.unauthorised_error = (message = "You are not authorized to access the apis. Login first!", data = null) => {
+    return res.status(401).json(new Response(message, data));
   };
 
   next();

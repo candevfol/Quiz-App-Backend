@@ -46,4 +46,9 @@ const sub_answer_schema = z.object({
 });
 const answer_schema = z.array(sub_answer_schema);
 
-export { quiz_schema, question_schema, answer_schema };
+const login_schema = z.object({
+  username:z.string().nonempty("Username cannot be empty"),
+  password:z.string().min(6, "Password must be at least 6 characters")
+})
+
+export { quiz_schema, question_schema, answer_schema, login_schema };
