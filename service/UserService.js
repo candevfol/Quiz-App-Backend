@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
+import { success } from "zod/v4";
 
 const prisma = new PrismaClient();
 
@@ -34,5 +35,25 @@ const register_user = async (body) => {
 
         return {success:true, data: {userId:user.id,token:token}}
 }
+const logout_user = async(jwt) => {
+  const authenticated_user = await prisma.authentication.findFirst({
+    where: {
+        jwt,
+        isValid: true
+    }
+  })
 
-export {register_user}
+  if(!authenticated_user) return {success: false, message: "Cookie not found/User isn't authenticated!"};
+
+  await prisma.authentication.update({
+    where: {
+        jwt: authenticated_user.jwt
+    },
+    data: {
+        isValid: false
+    }
+  })
+  return {success: true, message: "User logged out successfully"}
+}
+
+export {register_user, logout_user}

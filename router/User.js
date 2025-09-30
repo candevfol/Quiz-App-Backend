@@ -1,6 +1,6 @@
 import express from "express";
 import { login_schema } from "../utils/Schema.Zod.js";
-import { register_user } from "../service/UserService.js";
+import { logout_user, register_user } from "../service/UserService.js";
 
 const userRouter = express.Router();
 
@@ -25,6 +25,20 @@ userRouter.post('/login', async(req, res, next) => {
     }
     catch(err){
         next(err)
+    }
+})
+
+userRouter.post('/logout', async(req, res, next) => {
+    try{
+        const jwt = req.cookies.token;
+        const loggedOut = await logout_user(jwt);
+        if(!loggedOut.success){
+            return res.not_found(loggedOut.message);
+        }
+        return res.ok(loggedOut.message);
+    }
+    catch(err){
+        next(err);
     }
 })
 

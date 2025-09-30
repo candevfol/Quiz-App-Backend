@@ -21,10 +21,9 @@ model Authentication{
   userId String 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade )
 
-  jwt String
+  jwt String @unique
   isValid Boolean
 
-  @@id([userId, jwt])
 }
 
 model Quiz {
