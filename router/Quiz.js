@@ -39,7 +39,7 @@ quizRouter.get("/", async (req, res, next) => {
   }
 });
 
-quizRouter.get("/answer/:id", async (req, res, next) => {
+quizRouter.post("/answer/:id", async (req, res, next) => {
   const validationResult = answer_schema.safeParse(req.body);
   if (!validationResult.success) {
     const errorMessages = validationResult.error.issues.map((err) => ({
@@ -50,12 +50,13 @@ quizRouter.get("/answer/:id", async (req, res, next) => {
   }
 
   try {
+    const jwt = req.cookies.token;
     const quizId = parseInt(req.params.id, 10);
 
-    const scores = await calculate_score(quizId, req.body);
+    const scores = await calculate_score(quizId, req.body, jwt);
 
     if (!scores.success) return res.not_found(`Quiz not found`);
-    return res.ok(scores.message, scores.data);
+    return res.created(scores.message, scores.data);
   } catch (err) {
     next(err);
   }

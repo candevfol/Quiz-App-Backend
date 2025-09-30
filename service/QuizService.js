@@ -1,5 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { compare_answer } from "./GeminiService.js";
+import jwt from "jsonwebtoken"
+import userRouter from "../router/User.js";
 
 const prisma = new PrismaClient();
 
@@ -17,7 +19,7 @@ const find_all_quiz = async () => {
   return quiz;
 };
 
-const calculate_score = async (quizId, body) => {
+const calculate_score = async (quizId, body, token) => {
   const quiz = await prisma.quiz.findUnique({
     where: { id: quizId },
   });
@@ -75,12 +77,27 @@ const calculate_score = async (quizId, body) => {
   }
 
   const totalScore = scores.reduce((sum, score) => sum + score, 0);
-
+  const username = jwt.verify(token, process.env.JWT_SECRET).username;
+  await update_score(username, token, totalScore);
   return {
     success: true,
     data: totalScore,
     message: `Score Array: ${scores}`,
   };
 };
+
+const update_score = async (username, token, add) => {
+  await prisma.user.update({
+    where:{
+      username:username
+    },
+    data:{
+      score:{
+        increment:add
+      }
+    }
+  });
+    
+}
 
 export { create_quiz, find_all_quiz, calculate_score };
