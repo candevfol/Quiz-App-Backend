@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
-import { success } from "zod/v4";
 
 const prisma = new PrismaClient();
 
@@ -56,4 +55,17 @@ const logout_user = async(jwt) => {
   return {success: true, message: "User logged out successfully"}
 }
 
-export {register_user, logout_user}
+const get_score = async(token) => {
+  const username = jwt.verify(token, process.env.JWT_SECRET).username;
+  const score_found = await prisma.user.findUnique({
+    select:{
+      score:true
+    },
+    where: {
+        username
+    }
+  });
+  return {data:score_found}
+}
+
+export {register_user, logout_user, get_score}

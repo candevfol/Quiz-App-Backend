@@ -1,6 +1,7 @@
 import express from "express";
 import { login_schema } from "../utils/Schema.Zod.js";
-import { logout_user, register_user } from "../service/UserService.js";
+import { get_score, logout_user, register_user } from "../service/UserService.js";
+import AuthenticationMiddleware from "../middlewares/Authentication.js";
 
 const userRouter = express.Router();
 
@@ -36,6 +37,19 @@ userRouter.post('/logout', async(req, res, next) => {
             return res.not_found(loggedOut.message);
         }
         return res.ok(loggedOut.message);
+    }
+    catch(err){
+        next(err);
+    }
+})
+
+userRouter.use(AuthenticationMiddleware);
+
+userRouter.get('/score', async (req, res, next) => {
+    try{
+        const jwt = req.cookies.token;
+        const score = await get_score(jwt);
+        return res.ok("Score found", score.data);
     }
     catch(err){
         next(err);
