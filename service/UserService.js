@@ -68,4 +68,21 @@ const get_score = async(token) => {
   return {data:score_found}
 }
 
-export {register_user, logout_user, get_score}
+const get_rank = async (token) => {
+  const username = jwt.verify(token, process.env.JWT_SECRET).username;
+
+  const result = await prisma.$queryRaw`
+  SELECT u1.username,
+         COUNT(u2.id) + 1 AS rank
+  FROM "User" u1
+  LEFT JOIN "User" u2
+    ON u2.score > u1.score
+  WHERE u1.username = ${username}
+  GROUP BY u1.username;
+`;
+const rank = Number(result[0].rank);
+return {data: rank}
+
+}
+
+export {register_user, logout_user, get_score, get_rank}

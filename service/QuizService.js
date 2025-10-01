@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { compare_answer } from "./GeminiService.js";
-import jwt from "jsonwebtoken"
-import userRouter from "../router/User.js";
+import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
 
