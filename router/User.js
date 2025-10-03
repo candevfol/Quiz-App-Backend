@@ -36,6 +36,7 @@ userRouter.post('/logout', async(req, res, next) => {
         if(!loggedOut.success){
             return res.not_found(loggedOut.message);
         }
+        res.cookie("token", null);
         return res.ok(loggedOut.message);
     }
     catch(err){
